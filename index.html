@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOVA TEAM | Smart Waste</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f1f5f4;color:#183b35}
+header{background:#123d35;color:white;padding:24px 18px}
+header h1{margin:0;font-size:26px}
+header p{color:#c5e6dc;margin-bottom:0}
+main{max-width:850px;margin:22px auto;padding:0 15px}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.card,.panel{background:white;padding:18px;border-radius:14px;
+box-shadow:0 3px 12px #0000000b;margin-bottom:15px}
+.number{font-size:29px;font-weight:bold;color:#13866b}
+label{display:block;margin:13px 0 6px;font-weight:bold}
+input,select,button{width:100%;padding:12px;border-radius:8px;
+border:1px solid #ccd8d4;font-size:15px}
+button{background:#13866b;color:white;border:0;font-weight:bold;
+margin-top:14px;cursor:pointer}
+.item{padding:12px 0;border-bottom:1px solid #e4ece8}
+.track{height:8px;background:#e1ebe6;border-radius:8px;margin-top:8px}
+.bar{height:8px;background:#26a780;border-radius:8px;width:0%}
+.alert{background:#fff1ce;padding:12px;border-radius:9px;margin-top:12px}
+small{color:#647a73}
+footer{text-align:center;padding:20px;color:#647a73}
+</style>
+</head>
+<body>
+<header>
+  <h1>♻️ NOVA TEAM</h1>
+  <p>Smart Waste Segregation & Recycling Alert System</p>
+</header>
+<main>
+  <div class="cards">
+    <div class="card">
+      <small>Total Recorded Waste</small>
+      <div class="number" id="total">0 kg</div>
+    </div>
+    <div class="card">
+      <small>Waste Categories</small>
+      <div class="number" id="count">0</div>
+    </div>
+  </div>
+
+  <section class="panel">
+    <h2>➕ Record Waste</h2>
+    <label for="category">Waste category</label>
+    <select id="category">
+      <option>Plastic</option>
+      <option>Paper</option>
+      <option>Metal</option>
+      <option>Glass</option>
+      <option>Organic</option>
+    </select>
+    <label for="weight">Weight (kg)</label>
+    <input id="weight" type="number" min="0.1" step="0.1"
+    placeholder="Enter weight, e.g. 2.5">
+    <button onclick="addWaste()">Add Record</button>
+    <p id="message" role="status"></p>
+  </section>
+
+  <section class="panel">
+    <h2>📊 Waste Dashboard</h2>
+    <div id="categories">
+      <p>No records yet. Add waste to see the dashboard.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>🔔 Collection Alert</h2>
+    <p id="alert">No collection alert yet.</p>
+    <small>Demo threshold: 5 kg per category.</small>
+  </section>
+  <p><small>Concept prototype: records are temporary and reset when the page reloads. No real sensors are connected.</small></p>
+</main>
+<footer>NOVA TEAM • Sustainable Waste Management • SDG 11 & 12</footer>
+
+<script>
+const waste = {
+  Plastic: 0, Paper: 0, Metal: 0, Glass: 0, Organic: 0
+};
+
+function addWaste() {
+  const category = document.getElementById("category").value;
+  const input = document.getElementById("weight");
+  const weight = Number(input.value);
+  const message = document.getElementById("message");
+
+  if (!Number.isFinite(weight) || weight <= 0) {
+    message.textContent = "Please enter a valid weight above 0 kg.";
+    return;
+  }
+
+  waste[category] += weight;
+  message.textContent = "Demo record added successfully!";
+  input.value = "";
+  render();
+}
+
+function render() {
+  const total = Object.values(waste)
+    .reduce((sum, value) => sum + value, 0);
+
+  document.getElementById("total").textContent =
+    total.toFixed(1) + " kg";
+
+  document.getElementById("count").textContent =
+    Object.values(waste).filter(value => value > 0).length;
+
+  document.getElementById("categories").innerHTML =
+    Object.entries(waste).map(([name, value]) => {
+      const percent = Math.min(value / 5 * 100, 100);
+      return `<div class="item"><b>${name}</b>
+      <span style="float:right">${value.toFixed(1)} kg</span>
+      <div class="track"><div class="bar"
+      style="width:${percent}%"></div></div></div>`;
+    }).join("");
+
+  const alerts = Object.entries(waste)
+    .filter(([name, value]) => value >= 5)
+    .map(([name]) => name);
+
+  document.getElementById("alert").textContent =
+    alerts.length
+      ? "Demo alert: Arrange collection for " + alerts.join(", ") + "."
+      : "No collection threshold reached.";
+}
+</script>
+</body>
+</html>
